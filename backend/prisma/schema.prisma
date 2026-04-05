@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WhitelistedAccount {
+  id              String   @id @default(cuid())
+  instagramUserId String   @unique
+  username        String?
+  addedAt         DateTime @default(now())
+  isActive        Boolean  @default(true)
+
+  receivedPosts ReceivedPost[]
+}
+
+model ReceivedPost {
+  id         String   @id @default(cuid())
+  receivedAt DateTime @default(now())
+
+  senderId String
+  sender   WhitelistedAccount @relation(fields: [senderId], references: [instagramUserId])
+
+  dmMessageId String    @unique
+  mediaType   MediaType
+  mediaUrl    String
+  localFile   String?
+  caption     String?   @db.Text
+  rawPayload  Json
+
+  status       PostStatus @default(PENDING)
+  scheduledFor DateTime?
+  jobId        String?
+
+  instagramPostId String?
+  postedAt        DateTime?
+
+  activityLogs ActivityLog[]
+
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([senderId])
+}
+
+model AppConfig {
+  id            Int      @id @default(1)
+  targetPageId  String   @default("")
+  maxPostsPerDay Int     @default(3)
+  timezone      String   @default("America/Toronto")
+  updatedAt     DateTime @updatedAt
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  occurredAt DateTime @default(now())
+  level      LogLevel @default(INFO)
+  event      String
+  message    String
+  postId     String?
+  post       ReceivedPost? @relation(fields: [postId], references: [id])
+  meta       Json?
+
+  @@index([occurredAt(sort: Desc)])
+  @@index([event])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  CAROUSEL
+}
+
+enum PostStatus {
+  PENDING
+  SCHEDULED
+  POSTING
+  POSTED
+  FAILED
+  CANCELLED
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+}
