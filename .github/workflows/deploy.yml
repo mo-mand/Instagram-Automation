@@ -42,18 +42,19 @@ jobs:
           cp package.json dist/
           cp startup.sh dist/
           cp -r prisma dist/
-          cp -r node_modules/.prisma dist/node_modules/.prisma || true
-          cp -r node_modules/@prisma dist/node_modules/@prisma || true
           cp ../package-lock.json dist/
           cd dist && npm ci --omit=dev
+
+      - name: Zip deployment package
+        run: |
+          cd backend/dist
+          zip -r ../../deploy.zip .
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: instagram-automation-backend
-          package: backend/dist
+      - name: Deploy via Azure CLI
+        run: |
+          az webapp deploy --resource-group instagram-automation-rg --name instagram-automation-backend --src-path deploy.zip --type zip --async false
