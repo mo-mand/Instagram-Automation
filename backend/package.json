@@ -2,6 +2,9 @@
   "name": "instagram-ai-bot-backend",
   "version": "1.0.0",
   "private": true,
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
