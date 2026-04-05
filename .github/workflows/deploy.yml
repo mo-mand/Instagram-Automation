@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: backend
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma client
         working-directory: backend
@@ -37,18 +37,17 @@ jobs:
         run: npm run build
 
       - name: Prepare deployment package
-        working-directory: backend
         run: |
-          cp package.json dist/
-          cp startup.sh dist/
-          cp -r prisma dist/
-          cp ../package-lock.json dist/
-          cd dist && npm ci --omit=dev
+          mkdir -p deploy
+          cp -r backend/dist/* deploy/
+          cp backend/package.json deploy/
+          cp backend/startup.sh deploy/
+          cp -r backend/node_modules deploy/node_modules
+          echo "Deploy package size:"
+          du -sh deploy/
 
       - name: Zip deployment package
-        run: |
-          cd backend/dist
-          zip -r ../../deploy.zip .
+        run: zip -r deploy.zip deploy/
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -56,5 +55,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy via Azure CLI
-        run: |
-          az webapp deploy --resource-group instagram-automation-rg --name instagram-automation-backend --src-path deploy.zip --type zip --async false
+        run: az webapp deploy --resource-group instagram-automation-rg --name instagram-automation-backend --src-path deploy.zip --type zip --async false
+
+      - name: Restart app
+        run: az webapp restart --resource-group instagram-automation-rg --name instagram-automation-backend
