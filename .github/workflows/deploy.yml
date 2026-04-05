@@ -36,6 +36,15 @@ jobs:
         working-directory: backend
         run: npm run build
 
+      - name: Prepare deployment package
+        working-directory: backend
+        run: |
+          cp package.json dist/
+          cp package-lock.json dist/
+          cp startup.sh dist/
+          cp -r prisma dist/
+          cd dist && npm ci --omit=dev
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -45,4 +54,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: instagram-automation-backend
-          package: backend
+          package: backend/dist
