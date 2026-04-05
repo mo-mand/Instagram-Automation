@@ -40,9 +40,9 @@ jobs:
         working-directory: backend
         run: |
           cp package.json dist/
-          cp package-lock.json dist/
           cp startup.sh dist/
           cp -r prisma dist/
+          cp ../package-lock.json dist/
           cd dist && npm ci --omit=dev
 
       - name: Login to Azure
