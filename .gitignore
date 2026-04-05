@@ -16,9 +16,6 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Prisma
-backend/prisma/migrations/
-
 # Build
 frontend/dist/
 backend/dist/

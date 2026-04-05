@@ -20,27 +20,18 @@ async function bootstrap() {
     fs.mkdirSync(dataDir, { recursive: true });
   }
 
-  // Run Prisma migrations
+  // Run Prisma db push to create/sync tables
   try {
-    logger.info('Running database migrations...');
-    execSync('npx prisma migrate deploy', {
+    logger.info('Initializing database...');
+    execSync('./node_modules/.bin/prisma db push --accept-data-loss', {
       cwd: process.cwd(),
       stdio: 'inherit',
       env: { ...process.env },
     });
-    logger.info('Migrations complete');
+    logger.info('Database ready');
   } catch (err) {
-    logger.warn('Migration failed, attempting db push fallback...');
-    try {
-      execSync('npx prisma db push --accept-data-loss', {
-        cwd: process.cwd(),
-        stdio: 'inherit',
-        env: { ...process.env },
-      });
-      logger.info('DB push complete');
-    } catch (pushErr) {
-      logger.error('DB initialization failed', { error: String(pushErr) });
-    }
+    logger.error('Database initialization failed', { error: String(err) });
+    process.exit(1);
   }
 
   // Seed AppConfig if not exists
