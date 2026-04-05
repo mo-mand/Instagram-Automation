@@ -45,7 +45,7 @@ app.listen(env.PORT, () => {
   logger.info(`Backend running on port ${env.PORT}`);
 });
 
-// Start BullMQ worker
+// Start in-process job scheduler
 startPostWorker();
 
 export default app;

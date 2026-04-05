@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -24,14 +24,14 @@ model ReceivedPost {
   senderId String
   sender   WhitelistedAccount @relation(fields: [senderId], references: [instagramUserId])
 
-  dmMessageId String    @unique
-  mediaType   MediaType
+  dmMessageId String  @unique
+  mediaType   String  // "IMAGE" | "VIDEO" | "CAROUSEL"
   mediaUrl    String
   localFile   String?
-  caption     String?   @db.Text
-  rawPayload  Json
+  caption     String?
+  rawPayload  String  // JSON stringified
 
-  status       PostStatus @default(PENDING)
+  status       String    @default("PENDING")
   scheduledFor DateTime?
   jobId        String?
 
@@ -46,44 +46,23 @@ model ReceivedPost {
 }
 
 model AppConfig {
-  id            Int      @id @default(1)
-  targetPageId  String   @default("")
-  maxPostsPerDay Int     @default(3)
-  timezone      String   @default("America/Toronto")
-  updatedAt     DateTime @updatedAt
+  id             Int      @id @default(1)
+  targetPageId   String   @default("")
+  maxPostsPerDay Int      @default(3)
+  timezone       String   @default("America/Toronto")
+  updatedAt      DateTime @updatedAt
 }
 
 model ActivityLog {
   id         String   @id @default(cuid())
   occurredAt DateTime @default(now())
-  level      LogLevel @default(INFO)
+  level      String   @default("INFO") // "INFO" | "WARN" | "ERROR"
   event      String
   message    String
   postId     String?
   post       ReceivedPost? @relation(fields: [postId], references: [id])
-  meta       Json?
+  meta       String?  // JSON stringified
 
   @@index([occurredAt(sort: Desc)])
   @@index([event])
-}
-
-enum MediaType {
-  IMAGE
-  VIDEO
-  CAROUSEL
-}
-
-enum PostStatus {
-  PENDING
-  SCHEDULED
-  POSTING
-  POSTED
-  FAILED
-  CANCELLED
-}
-
-enum LogLevel {
-  INFO
-  WARN
-  ERROR
 }

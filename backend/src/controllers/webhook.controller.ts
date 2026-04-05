@@ -62,7 +62,7 @@ async function processMessage(messaging: any, rawPayload: any): Promise<void> {
           event: 'DM_BLOCKED',
           message: `DM from non-whitelisted sender ${senderId} was ignored`,
           level: 'WARN',
-          meta: { senderId, messageId },
+          meta: JSON.stringify({ senderId, messageId }),
         },
       });
       return;
@@ -93,7 +93,7 @@ async function processMessage(messaging: any, rawPayload: any): Promise<void> {
         mediaType,
         mediaUrl,
         caption: text || null,
-        rawPayload,
+        rawPayload: JSON.stringify(rawPayload),
         status: 'PENDING',
       },
     });
@@ -115,7 +115,7 @@ async function processMessage(messaging: any, rawPayload: any): Promise<void> {
         message: `DM received from @${whitelisted.username || senderId}`,
         postId: post.id,
         level: 'INFO',
-        meta: { senderId, messageId, mediaType },
+        meta: JSON.stringify({ senderId, messageId, mediaType }),
       },
     });
 

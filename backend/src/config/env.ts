@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
-  REDIS_URL: z.string().min(1),
   INSTAGRAM_APP_ID: z.string().min(1),
   INSTAGRAM_APP_SECRET: z.string().min(1),
   INSTAGRAM_ACCESS_TOKEN: z.string().min(1),
