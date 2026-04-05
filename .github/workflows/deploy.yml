@@ -28,26 +28,18 @@ jobs:
         working-directory: backend
         run: npm install
 
-      - name: Generate Prisma client
-        working-directory: backend
-        run: npx prisma generate
-
       - name: Build TypeScript
         working-directory: backend
         run: npm run build
 
-      - name: Prepare deployment package
+      - name: Zip deployment package
         run: |
           mkdir -p deploy
-          cp -r backend/dist/* deploy/
-          cp backend/package.json deploy/
+          cp backend/dist/index.js deploy/
           cp backend/startup.sh deploy/
-          cp -r backend/node_modules deploy/node_modules
-          echo "Deploy package size:"
-          du -sh deploy/
-
-      - name: Zip deployment package
-        run: zip -r deploy.zip deploy/
+          cd deploy
+          zip -r ../deploy.zip .
+          echo "Zip size: $(du -sh ../deploy.zip)"
 
       - name: Login to Azure
         uses: azure/login@v2
